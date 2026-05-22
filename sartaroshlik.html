@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CutTime — Sartaroshxona Booking</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#1a1a2e;
+  --accent:#e8a838;
+  --accent2:#16213e;
+  --bg:#f7f5f0;
+  --card:#ffffff;
+  --text:#1a1a2e;
+  --muted:#7a7a8c;
+  --border:#e8e6e0;
+  --success:#22c55e;
+  --danger:#ef4444;
+  --radius:14px;
+  --shadow:0 2px 20px rgba(0,0,0,0.08);
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* NAV */
+nav{background:var(--primary);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{color:#fff;font-weight:800;font-size:20px;letter-spacing:-0.5px}
+.logo span{color:var(--accent)}
+.nav-btns{display:flex;gap:10px;align-items:center}
+.btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:all .2s}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.3)}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.08)}
+.btn-accent{background:var(--accent);color:var(--primary)}
+.btn-accent:hover{background:#d4952e;transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:#0f0f1f}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-lg{padding:14px 28px;font-size:16px;border-radius:12px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--primary) 0%,#16213e 60%,#0f3460 100%);padding:80px 24px 100px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(232,168,56,0.15) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(232,168,56,0.08) 0%,transparent 70%);pointer-events:none}
+.hero h1{color:#fff;font-size:clamp(32px,5vw,56px);font-weight:800;line-height:1.1;margin-bottom:16px;letter-spacing:-1px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:rgba(255,255,255,0.65);font-size:18px;margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto}
+.search-bar{background:#fff;border-radius:14px;padding:6px;display:flex;gap:6px;max-width:500px;margin:0 auto 20px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.search-bar input{flex:1;border:none;outline:none;padding:10px 14px;font-family:inherit;font-size:15px;color:var(--text);border-radius:10px}
+.hero-stats{display:flex;gap:32px;justify-content:center;margin-top:48px;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat strong{display:block;color:#fff;font-size:28px;font-weight:800}
+.hero-stat span{color:rgba(255,255,255,0.5);font-size:13px}
+
+/* LISTING */
+.page-header{padding:24px;border-bottom:1px solid var(--border);background:#fff;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.page-header h2{font-size:20px;font-weight:700;margin-right:auto}
+.filter-chip{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted)}
+.filter-chip.active,.filter-chip:hover{border-color:var(--accent);background:rgba(232,168,56,0.08);color:var(--primary)}
+.grid{padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+
+/* BARBER CARD */
+.barber-card{background:var(--card);border-radius:var(--radius);border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all .25s}
+.barber-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.12);border-color:var(--accent)}
+.card-img{height:180px;position:relative;overflow:hidden}
+.card-img-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px}
+.card-badge{position:absolute;top:12px;right:12px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.card-badge.open{background:#22c55e}
+.card-badge.busy{background:#f59e0b}
+.card-body{padding:16px}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.card-loc{color:var(--muted);font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:4px}
+.card-meta{display:flex;justify-content:space-between;align-items:center}
+.rating{display:flex;align-items:center;gap:4px;font-weight:700;font-size:14px}
+.stars{color:var(--accent);font-size:13px}
+.price-badge{background:rgba(232,168,56,0.12);color:#b8840a;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px}
+.wait-time{font-size:12px;color:var(--success);font-weight:600;margin-top:8px;display:flex;align-items:center;gap:4px}
+.wait-time.busy{color:#f59e0b}
+
+/* DETAIL PAGE */
+.detail-hero{background:var(--primary);padding:24px;display:flex;gap:20px;align-items:flex-start}
+.detail-avatar{width:80px;height:80px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:40px;background:rgba(255,255,255,0.1);flex-shrink:0}
+.detail-info h1{color:#fff;font-size:22px;font-weight:800;margin-bottom:4px}
+.detail-info p{color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:12px}
+.detail-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.chip-light{background:rgba(255,255,255,0.12);color:#fff}
+.chip-accent{background:var(--accent);color:var(--primary)}
+.back-btn{background:rgba(255,255,255,0.1);border:none;color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:16px}
+.back-btn:hover{background:rgba(255,255,255,0.2)}
+.section{padding:24px;border-bottom:1px solid var(--border)}
+.section-title{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.service-item{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s}
+.service-item:hover,.service-item.selected{border-color:var(--accent);background:rgba(232,168,56,0.05)}
+.service-item.selected{border-width:2px}
+.service-name{font-weight:600;font-size:14px;margin-bottom:4px}
+.service-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.service-price{color:var(--primary);font-weight:700}
+
+/* TIME SLOTS */
+.date-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px}
+.date-btn{min-width:56px;padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:pointer;text-align:center;transition:all .2s;flex-shrink:0}
+.date-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.date-btn:hover:not(.active){border-color:var(--accent)}
+.date-day{font-size:11px;color:var(--muted);font-weight:600}
+.date-num{font-size:18px;font-weight:700}
+.date-btn.active .date-day{color:rgba(255,255,255,0.6)}
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px}
+.slot{padding:10px;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:pointer;text-align:center;font-size:14px;font-weight:600;transition:all .2s}
+.slot:hover:not(.taken){border-color:var(--accent);background:rgba(232,168,56,0.08)}
+.slot.selected{background:var(--primary);border-color:var(--primary);color:#fff}
+.slot.taken{background:#f5f5f5;color:#ccc;cursor:not-allowed;border-color:#eee;text-decoration:line-through}
+
+/* BOOKING SIDEBAR */
+.layout-2col{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 60px)}
+@media(max-width:768px){.layout-2col{grid-template-columns:1fr}}
+.main-col{overflow-y:auto;max-height:calc(100vh - 60px)}
+.side-col{background:#fff;border-left:1px solid var(--border);padding:24px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.side-col h3{font-size:16px;font-weight:700;margin-bottom:20px}
+.booking-item{display:flex;justify-content:space-between;font-size:14px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.booking-item:last-child{border-bottom:none}
+.booking-label{color:var(--muted)}
+.booking-val{font-weight:600}
+.total-row{display:flex;justify-content:space-between;font-size:18px;font-weight:800;padding-top:16px;border-top:2px solid var(--border)}
+.loyalty-bar{background:rgba(232,168,56,0.1);border:1.5px solid rgba(232,168,56,0.3);border-radius:12px;padding:14px;margin:16px 0}
+.loyalty-dots{display:flex;gap:6px;margin-top:10px}
+.loyalty-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:#f5f5f0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.loyalty-dot.filled{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* REVIEWS */
+.review{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.review-header{display:flex;justify-content:space-between;margin-bottom:8px}
+.review-name{font-weight:600;font-size:14px}
+.review-date{font-size:12px;color:var(--muted)}
+.review-text{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;padding:32px;max-width:440px;width:100%;text-align:center}
+.modal-icon{width:72px;height:72px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:36px}
+.modal-icon.success{background:rgba(34,197,94,0.1)}
+.modal-icon.warning{background:rgba(245,158,11,0.1)}
+.modal h2{font-size:22px;font-weight:800;margin-bottom:8px}
+.modal p{color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:24px}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+
+/* BOOKINGS PAGE */
+.bookings-list{padding:24px;max-width:600px;margin:0 auto}
+.booking-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.booking-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.booking-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.status-upcoming{background:rgba(34,197,94,0.1);color:#16a34a}
+.status-cancelled{background:rgba(239,68,68,0.1);color:#dc2626}
+.status-done{background:rgba(100,116,139,0.1);color:#475569}
+.booking-shop{font-size:16px;font-weight:700;margin-bottom:4px}
+.booking-detail{font-size:13px;color:var(--muted);margin-bottom:3px}
+.cancel-policy{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;font-size:13px;color:#92400e;margin-top:12px}
+
+/* TABS */
+.tab-bar{display:flex;background:#fff;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:14px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:50}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;color:var(--muted);font-size:11px;font-weight:600;transition:color .2s}
+.nav-item.active,.nav-item:hover{color:var(--primary)}
+.nav-item svg{width:22px;height:22px}
+.spacer{height:72px}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--primary);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;z-index:2000;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PROFILE */
+.profile-section{padding:24px;max-width:500px;margin:0 auto}
+.profile-header{background:var(--primary);border-radius:20px;padding:28px;text-align:center;color:#fff;margin-bottom:20px}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px}
+.profile-name{font-size:22px;font-weight:800;margin-bottom:4px}
+.profile-phone{font-size:14px;opacity:0.6}
+.stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat-num{font-size:28px;font-weight:800;color:var(--primary)}
+.stat-label{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* HELPERS */
+.flex{display:flex}
+.gap-8{gap:8px}
+.mt-8{margin-top:8px}
+.mt-16{margin-top:16px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SCREEN: HOME -->
+<div class="screen active" id="screen-home">
+  <nav>
+    <div class="logo">Cut<span>Time</span></div>
+    <div class="nav-btns">
+      <button class="btn btn-outline" onclick="navigate('screen-bookings')">Navbatlarim</button>
+      <button class="btn btn-accent" onclick="navigate('screen-profile')">👤</button>
+    </div>
+  </nav>
+  <div class="hero">
+    <h1>Sartaroshga<br><span>online navbat</span> ol</h1>
+    <p>O'zbekistonning eng yaxshi sartaroshxonalari bir joyda. Kutmasdan — onlayn band qil.</p>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="🔍  Sartaroshxona yoki joy..." oninput="filterShops()">
+      <button class="btn btn-accent" onclick="navigate('screen-list')">Qidirish</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>120+</strong><span>Sartaroshxona</span></div>
+      <div class="hero-stat"><strong>4.8★</strong><span>O'rtacha reyting</span></div>
+      <div class="hero-stat"><strong>15min</strong><span>Tezkor navbat</span></div>
+    </div>
+  </div>
+  <!-- Featured -->
+  <div style="padding:24px">
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:16px">🔥 Ommabop sartaroshxonalar</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="featured-grid"></div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- SCREEN: LIST -->
+<div class="screen" id="screen-list">
+  <nav>
+    <button class="back-btn" style="background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0" onclick="navigate('screen-home')">←</button>
+    <div class="logo">Cut<span>Time</span></div>
+    <div style="width:40px"></div>
+  </nav>
+  <div class="page-header">
+    <h2>Sartaroshxonalar</h2>
+    <button class="filter-chip active" onclick="setFilter('all',this)">Hammasi</button>
+    <button class="filter-chip" onclick="setFilter('top',this)">⭐ Top</button>
+    <button class="filter-chip" onclick="setFilter('cheap',this)">💰 Arzon</button>
+    <button class="filter-chip" onclick="setFilter('open',this)">🟢 Ochiq</button>
+  </div>
+  <div class="grid" id="shops-grid"></div>
+  <div class="spacer"></div>
+</div>
+
+<!-- SCREEN: DETAIL -->
+<div class="screen" id="screen-detail">
+  <nav>
+    <button class="back-btn" style="background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0" onclick="navigate('screen-list')">←</button>
+    <div class="logo">Cut<span>Time</span></div>
+    <div style="width:40px"></div>
+  </nav>
+  <div class="layout-2col">
+    <div class="main-col" id="detail-main"></div>
+    <div class="side-col" id="detail-side"></div>
+  </div>
+</div>
+
+<!-- SCREEN: BOOKINGS -->
+<div class="screen" id="screen-bookings">
+  <nav>
+    <div class="logo">Cut<span>Time</span></div>
+    <div class="nav-btns">
+      <button class="btn btn-outline" onclick="navigate('screen-home')">← Bosh sahifa</button>
+    </div>
+  </nav>
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('upcoming',this)">Kelayotgan</div>
+    <div class="tab" onclick="showTab('past',this)">O'tgan</div>
+  </div>
+  <div class="bookings-list" id="bookings-content"></div>
+  <div class="spacer"></div>
+</div>
+
+<!-- SCREEN: PROFILE -->
+<div class="screen" id="screen-profile">
+  <nav>
+    <div class="logo">Cut<span>Time</span></div>
+    <div class="nav-btns">
+      <button class="btn btn-outline" onclick="navigate('screen-home')">← Orqaga</button>
+    </div>
+  </nav>
+  <div class="profile-section">
+    <div class="profile-header">
+      <div class="profile-avatar">👤</div>
+      <div class="profile-name">Alisher Toshmatov</div>
+      <div class="profile-phone">+998 90 123 45 67</div>
+    </div>
+    <div class="stat-cards">
+      <div class="stat-card"><div class="stat-num" id="p-visits">0</div><div class="stat-label">Umumiy tashrif</div></div>
+      <div class="stat-card"><div class="stat-num" id="p-saved">0</div><div class="stat-label">Tejaldi (so'm)</div></div>
+    </div>
+    <div class="loyalty-bar">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700;font-size:15px">🏆 Sodiqlik kartasi</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px" id="loyalty-text">10 tashrifdan 1 tasi bepul!</div>
+        </div>
+        <div style="font-weight:800;font-size:22px;color:var(--accent)" id="loyalty-count">0/10</div>
+      </div>
+      <div class="loyalty-dots" id="loyalty-dots"></div>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden">
+      <div onclick="navigate('screen-bookings')" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border-bottom:1px solid var(--border)">
+        <span style="font-weight:600">📅 Navbatlarim</span><span style="color:var(--muted)">→</span>
+      </div>
+      <div onclick="showToast('SMS eslatmalar yoqilgan ✓')" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border-bottom:1px solid var(--border)">
+        <span style="font-weight:600">🔔 Bildirishnomalar</span><span style="color:var(--success);font-weight:700;font-size:13px">Yoqilgan</span>
+      </div>
+      <div onclick="showToast('Til o\'zgartirildi')" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer">
+        <span style="font-weight:600">🌐 Til</span><span style="color:var(--muted);font-size:13px">O'zbek →</span>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="navigate('screen-home');setActiveNav(this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>
+    Asosiy
+  </div>
+  <div class="nav-item" onclick="navigate('screen-list');setActiveNav(this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    Qidirish
+  </div>
+  <div class="nav-item" onclick="navigate('screen-bookings');setActiveNav(this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    Navbat
+  </div>
+  <div class="nav-item" onclick="navigate('screen-profile');setActiveNav(this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    Profil
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const SHOPS = [
+  {id:1,name:"Royal Barber Tashkent",emoji:"✂️",loc:"Chilonzor, Toshkent",dist:"0.4 km",rating:4.9,reviews:312,price:"25,000–60,000",priceNum:25000,open:true,wait:5,color:"#1a1a2e",services:[
+    {name:"Soch olish",price:25000,time:30},{name:"Soqol olish",price:20000,time:20},{name:"Soch+Soqol",price:40000,time:50},{name:"Bolalar soch",price:20000,time:25},{name:"Rang berish",price:60000,time:90}],
+    barbers:["Jasur usta","Bobur usta","Sardor usta"],
+    reviews:[{name:"Alisher",date:"2 kun oldin",text:"Jasur usta juda professional! Navbat olish juda qulay.",stars:5},{name:"Murod",date:"5 kun oldin",text:"Har safar yaxshi xizmat. Tavsiya qilaman!",stars:5},{name:"Sherzod",date:"1 hafta oldin",text:"Narx-sifat nisbati zo'r.",stars:4}]
+  },
+  {id:2,name:"Classic Cut Studio",emoji:"💈",loc:"Yakkasaroy, Toshkent",dist:"1.2 km",rating:4.7,reviews:198,price:"20,000–50,000",priceNum:20000,open:true,wait:20,color:"#0f3460",services:[
+    {name:"Soch olish",price:20000,time:30},{name:"Soqol pardozlash",price:15000,time:20},{name:"Kombo paketi",price:30000,time:45},{name:"Bolalar",price:18000,time:25}],
+    barbers:["Kamol usta","Dilshod usta"],
+    reviews:[{name:"Nodir",date:"3 kun oldin",text:"Kamol usta zo'r usta. Xuddi xohlagan ko'rinishni qildi.",stars:5},{name:"Jahongir",date:"1 hafta oldin",text:"Toza va qulay joy.",stars:4}]
+  },
+  {id:3,name:"Gentlemen's Club",emoji:"🎩",loc:"Mirzo Ulug'bek, Toshkent",dist:"2.1 km",rating:4.8,reviews:445,price:"35,000–80,000",priceNum:35000,open:false,wait:0,color:"#2d1b69",services:[
+    {name:"Premium soch",price:35000,time:40},{name:"Frantsuz soqol",price:30000,time:35},{name:"Full paketi",price:80000,time:90},{name:"Yuz parvarishi",price:45000,time:45}],
+    barbers:["Amir usta","Bekzod usta","Ulugbek usta"],
+    reviews:[{name:"Ravshan",date:"1 kun oldin",text:"Premium xizmat, premium narx. Lekin arziydi!",stars:5},{name:"Timur",date:"4 kun oldin",text:"Eng yaxshi sartaroshxona Toshkentda.",stars:5}]
+  },
+  {id:4,name:"FreshCut Barbershop",emoji:"⚡",loc:"Sergeli, Toshkent",dist:"3.5 km",rating:4.6,reviews:156,price:"15,000–35,000",priceNum:15000,open:true,wait:10,color:"#1e3a5f",services:[
+    {name:"Soch olish",price:15000,time:25},{name:"Soqol",price:12000,time:15},{name:"Kombo",price:25000,time:40}],
+    barbers:["Firdavs usta"],
+    reviews:[{name:"Sanjar",date:"2 kun oldin",text:"Arzon va sifatli. Har haftada boraman.",stars:4}]
+  },
+  {id:5,name:"Alpha Barber",emoji:"🏆",loc:"Uchtepa, Toshkent",dist:"1.8 km",rating:4.5,reviews:89,price:"20,000–45,000",priceNum:20000,open:true,wait:35,color:"#3d2b1f",services:[
+    {name:"Soch olish",price:20000,time:30},{name:"Soqol",price:18000,time:20},{name:"To'liq xizmat",price:45000,time:60}],
+    barbers:["Hamza usta","Islom usta"],
+    reviews:[{name:"Eldor",date:"3 kun oldin",text:"Yaxshi usta. Navbat ko'p bo'ladi ba'zan.",stars:4}]
+  },
+  {id:6,name:"Vintage Cuts",emoji:"🪒",loc:"Shayxontohur, Toshkent",dist:"0.9 km",rating:4.7,reviews:203,price:"22,000–55,000",priceNum:22000,open:true,wait:15,color:"#1a3a2a",services:[
+    {name:"Klassik soch",price:22000,time:30},{name:"Vintaj soqol",price:20000,time:25},{name:"Klassik paketi",price:38000,time:55}],
+    barbers:["Zafar usta","Nurbek usta"],
+    reviews:[{name:"Adham",date:"5 kun oldin",text:"Vintaj uslub juda yoqadi. Professional usta.",stars:5}]
+  }
+];
+
+let currentShop = null;
+let selectedService = null;
+let selectedDate = null;
+let selectedSlot = null;
+let selectedBarber = null;
+let bookings = JSON.parse(localStorage.getItem('ct_bookings')||'[]');
+let loyaltyCount = parseInt(localStorage.getItem('ct_loyalty')||'0');
+let activeFilter = 'all';
+
+const DAYS = ['Yak','Du','Se','Cho','Pay','Ju','Sha'];
+const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+
+function navigate(screenId){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  window.scrollTo(0,0);
+  if(screenId==='screen-list')renderShops();
+  if(screenId==='screen-bookings')renderBookings('upcoming');
+  if(screenId==='screen-profile')renderProfile();
+}
+
+function setActiveNav(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// RENDER SHOP CARDS
+function shopCard(shop,onclick){
+  const waitColor = shop.wait<=15?'var(--success)':shop.wait<=30?'#f59e0b':'var(--danger)';
+  const waitText = !shop.open?'Yopiq':shop.wait===0?'Hozir band':'~'+shop.wait+' daq kutish';
+  return `<div class="barber-card" onclick="${onclick}">
+    <div class="card-img" style="background:${shop.color}20">
+      <div style="font-size:64px">${shop.emoji}</div>
+    </div>
+    <span class="card-badge ${shop.open?(shop.wait<20?'open':'busy'):''}">${shop.open?'Ochiq':'Yopiq'}</span>
+    <div class="card-body">
+      <div class="card-title">${shop.name}</div>
+      <div class="card-loc">📍 ${shop.loc} · ${shop.dist}</div>
+      <div class="card-meta">
+        <div class="rating"><span class="stars">★</span> ${shop.rating} <span style="color:var(--muted);font-weight:400;font-size:12px">(${shop.reviews})</span></div>
+        <div class="price-badge">💰 ${shop.price}</div>
+      </div>
+      <div class="wait-time ${shop.wait>20?'busy':''}" style="color:${waitColor}">⏱ ${waitText}</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('featured-grid').innerHTML = SHOPS.slice(0,3).map(s=>shopCard(s,`openShop(${s.id})`)).join('');
+
+function renderShops(){
+  let filtered = [...SHOPS];
+  const q = document.getElementById('search-input')?.value?.toLowerCase()||'';
+  if(q)filtered=filtered.filter(s=>s.name.toLowerCase().includes(q)||s.loc.toLowerCase().includes(q));
+  if(activeFilter==='top')filtered=filtered.filter(s=>s.rating>=4.8);
+  if(activeFilter==='cheap')filtered=filtered.sort((a,b)=>a.priceNum-b.priceNum);
+  if(activeFilter==='open')filtered=filtered.filter(s=>s.open);
+  document.getElementById('shops-grid').innerHTML = filtered.length
+    ? filtered.map(s=>shopCard(s,`openShop(${s.id})`)).join('')
+    : '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>Hech narsa topilmadi</p></div>';
+}
+
+function filterShops(){navigate('screen-list')}
+
+function setFilter(f,el){
+  activeFilter=f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderShops();
+}
+
+// OPEN SHOP DETAIL
+function openShop(id){
+  currentShop = SHOPS.find(s=>s.id===id);
+  selectedService=null;selectedDate=null;selectedSlot=null;selectedBarber=null;
+  navigate('screen-detail');
+  renderDetail();
+}
+
+function renderDetail(){
+  const s = currentShop;
+  document.getElementById('detail-main').innerHTML = `
+    <div class="detail-hero">
+      <div>
+        <button class="back-btn" onclick="navigate('screen-list')">← Orqaga</button>
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div class="detail-avatar">${s.emoji}</div>
+          <div class="detail-info">
+            <h1>${s.name}</h1>
+            <p>📍 ${s.loc} · ${s.dist}</p>
+            <div class="detail-chips">
+              <span class="chip chip-light">★ ${s.rating} (${s.reviews})</span>
+              <span class="chip ${s.open?'chip-accent':'chip-light'}">${s.open?'🟢 Ochiq':'🔴 Yopiq'}</span>
+              <span class="chip chip-light">💰 ${s.price}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Xizmatlar</div>
+      <div class="services-grid">${s.services.map((sv,i)=>`
+        <div class="service-item" id="svc-${i}" onclick="selectService(${i})">
+          <div class="service-name">${sv.name}</div>
+          <div class="service-meta">
+            <span>⏱ ${sv.time} daq</span>
+            <span class="service-price">${sv.price.toLocaleString()} so'm</span>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Usta tanlash</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${s.barbers.map((b,i)=>`
+        <button class="btn btn-ghost" id="barber-${i}" onclick="selectBarber(${i},'${b}')" style="font-size:13px">${b}</button>`).join('')}
+        <button class="btn btn-ghost" id="barber-any" onclick="selectBarber(-1,'Istalgan usta')" style="font-size:13px">Istalgan usta</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Sana tanlang</div>
+      <div class="date-row">${genDates()}</div>
+    </div>
+    <div class="section" id="slots-section" style="display:none">
+      <div class="section-title">Vaqt tanlang</div>
+      <div class="slots-grid" id="slots-grid"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Mijozlar izohlari</div>
+      ${s.reviews.map(r=>`<div class="review">
+        <div class="review-header"><span class="review-name">${r.name}</span><span class="review-date">${r.date}</span></div>
+        <div style="color:var(--accent);font-size:13px;margin-bottom:4px">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+        <div class="review-text">${r.text}</div>
+      </div>`).join('')}
+    </div>
+    <div class="spacer"></div>`;
+  renderSide();
+}
+
+function genDates(){
+  let html='';
+  const now=new Date();
+  for(let i=0;i<7;i++){
+    const d=new Date(now);d.setDate(d.getDate()+i);
+    const dateStr=d.toDateString();
+    html+=`<button class="date-btn ${i===0?'active':''}" onclick="selectDate('${dateStr}',this)">
+      <div class="date-day">${DAYS[d.getDay()]}</div>
+      <div class="date-num">${d.getDate()}</div>
+    </button>`;
+  }
+  return html;
+}
+
+function selectDate(d,el){
+  selectedDate=d;selectedSlot=null;
+  document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('slots-section').style.display='block';
+  renderSlots();
+  renderSide();
+}
+
+function renderSlots(){
+  const times=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+  const taken=[2,5,8,11,14];
+  document.getElementById('slots-grid').innerHTML=times.map((t,i)=>`
+    <div class="slot ${taken.includes(i)?'taken':''}" id="slot-${i}" onclick="${taken.includes(i)?'':'selectSlot(\''+t+'\','+i+')'}">${t}</div>`).join('');
+}
+
+function selectSlot(t,i){
+  selectedSlot=t;
+  document.querySelectorAll('.slot').forEach(s=>{if(!s.classList.contains('taken'))s.classList.remove('selected')});
+  document.getElementById('slot-'+i).classList.add('selected');
+  renderSide();
+}
+
+function selectService(i){
+  selectedService=currentShop.services[i];
+  document.querySelectorAll('.service-item').forEach(s=>s.classList.remove('selected'));
+  document.getElementById('svc-'+i).classList.add('selected');
+  renderSide();
+}
+
+function selectBarber(i,name){
+  selectedBarber=name;
+  document.querySelectorAll('[id^="barber-"]').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor=''});
+  const el=document.getElementById(i===-1?'barber-any':'barber-'+i);
+  if(el){el.style.background=getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();el.style.color='#fff';el.style.borderColor='transparent';}
+  renderSide();
+}
+
+function renderSide(){
+  const s=currentShop;
+  const canBook=selectedService&&selectedDate&&selectedSlot;
+  document.getElementById('detail-side').innerHTML=`
+    <h3>📋 Navbat ma'lumotlari</h3>
+    <div class="booking-item"><span class="booking-label">Sartaroshxona</span><span class="booking-val" style="font-size:13px">${s.name}</span></div>
+    <div class="booking-item"><span class="booking-label">Xizmat</span><span class="booking-val">${selectedService?selectedService.name:'<span style="color:var(--muted);font-weight:400">Tanlanmagan</span>'}</span></div>
+    <div class="booking-item"><span class="booking-label">Usta</span><span class="booking-val">${selectedBarber||'<span style="color:var(--muted);font-weight:400">Tanlanmagan</span>'}</span></div>
+    <div class="booking-item"><span class="booking-label">Sana</span><span class="booking-val">${selectedDate?formatDate(selectedDate):'<span style="color:var(--muted);font-weight:400">Tanlanmagan</span>'}</span></div>
+    <div class="booking-item"><span class="booking-label">Vaqt</span><span class="booking-val">${selectedSlot||'<span style="color:var(--muted);font-weight:400">Tanlanmagan</span>'}</span></div>
+    <div class="total-row"><span>Jami</span><span>${selectedService?(selectedService.price.toLocaleString()+' so\'m'):'—'}</span></div>
+    <div class="loyalty-bar" style="margin:16px 0 20px">
+      <div style="font-weight:700;font-size:14px">🏆 Sizda ${loyaltyCount}/10 tashrif</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">${loyaltyCount>=9?'🎉 Keyingi tashrif BEPUL!':'Yana '+(10-loyaltyCount)+' tashrif — 1 bepul xizmat!'}</div>
+    </div>
+    <button class="btn btn-accent btn-lg" style="width:100%;margin-bottom:10px" ${canBook?'':'disabled style="opacity:0.5;cursor:not-allowed"'} onclick="${canBook?'confirmBooking()':'showToast(\'Xizmat, sana va vaqt tanlang\')'}">
+      ${canBook?'✓ Navbat olish':'Malumotlarni tanlang'}
+    </button>
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px">💳 Online to'lov · 🔔 SMS eslatma · ✓ Bepul bekor qilish (24 soat)</div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">⚠️ Bekor qilish siyosati</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8">
+      ✅ 24 soat oldin — bepul<br>
+      ⚡ 2–24 soat — 50% jarima<br>
+      🚫 2 soat ichida — 100% jarima
+    </div>`;
+}
+
+function formatDate(dateStr){
+  const d=new Date(dateStr);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+
+function confirmBooking(){
+  showModal('confirm');
+}
+
+function showModal(type){
+  const mc=document.getElementById('modal-content');
+  if(type==='confirm'){
+    mc.innerHTML=`
+      <div class="modal-icon warning">💳</div>
+      <h2>To'lovni tasdiqlash</h2>
+      <p>${currentShop.name}<br>${selectedService.name} — ${selectedBarber}<br>${formatDate(selectedDate)}, ${selectedSlot}</p>
+      <div style="background:#f7f5f0;border-radius:12px;padding:16px;margin-bottom:20px;font-size:18px;font-weight:800">${selectedService.price.toLocaleString()} so'm</div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" onclick="closeModal()">Bekor</button>
+        <button class="btn btn-accent btn-lg" onclick="processPayment()">💳 To'lash</button>
+      </div>`;
+  } else if(type==='success'){
+    mc.innerHTML=`
+      <div class="modal-icon success">✅</div>
+      <h2>Navbat olindi!</h2>
+      <p>${currentShop.name}<br>${formatDate(selectedDate)}, soat ${selectedSlot}<br>SMS eslatma yuboriladi 📲</p>
+      <div style="background:rgba(232,168,56,0.1);border-radius:12px;padding:12px;margin-bottom:20px;font-size:13px;color:#92400e">🏆 Loyallik: ${loyaltyCount}/10 tashrif ${loyaltyCount>=10?'— keyingisi BEPUL!':''}</div>
+      <div class="modal-btns">
+        <button class="btn btn-accent btn-lg" onclick="closeModal();navigate('screen-bookings')">Navbatlarimni ko'rish →</button>
+      </div>`;
+  }
+  document.getElementById('modal').classList.add('open');
+}
+
+function processPayment(){
+  const booking={
+    id:Date.now(),
+    shop:currentShop.name,
+    emoji:currentShop.emoji,
+    service:selectedService.name,
+    barber:selectedBarber,
+    date:selectedDate,
+    slot:selectedSlot,
+    price:selectedService.price,
+    status:'upcoming',
+    booked:new Date().toISOString()
+  };
+  bookings.unshift(booking);
+  loyaltyCount=Math.min(10,loyaltyCount+1);
+  if(loyaltyCount===10)loyaltyCount=0;
+  localStorage.setItem('ct_bookings',JSON.stringify(bookings));
+  localStorage.setItem('ct_loyalty',loyaltyCount.toString());
+  showModal('success');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+
+// BOOKINGS
+function renderBookings(tab){
+  const list=bookings.filter(b=>b.status===tab||(tab==='past'&&b.status==='done')||(tab==='upcoming'&&b.status==='upcoming'));
+  const el=document.getElementById('bookings-content');
+  if(!list.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">${tab==='upcoming'?'📅':'🕐'}</div><p>${tab==='upcoming'?'Hozircha navbat yo\'q':'O\'tgan navbatlar yo\'q'}</p>${tab==='upcoming'?'<button class="btn btn-accent" style="margin-top:16px" onclick="navigate(\'screen-list\')">Navbat olish →</button>':''}</div>`;
+    return;
+  }
+  el.innerHTML=list.map(b=>{
+    const canCancel=b.status==='upcoming';
+    const bookDate=new Date(b.booked);
+    const apptDate=new Date(b.date);
+    const hoursLeft=(apptDate-new Date())/3600000;
+    let cancelInfo='';
+    if(canCancel){
+      if(hoursLeft>24)cancelInfo='✅ Bepul bekor qilish mumkin';
+      else if(hoursLeft>2)cancelInfo='⚡ Bekor qilsangiz 50% jarima';
+      else cancelInfo='🚫 Bekor qilish mumkin emas (100%)';
+    }
+    return `<div class="booking-card">
+      <div class="booking-card-header">
+        <div>
+          <div class="booking-shop">${b.emoji} ${b.shop}</div>
+          <div class="booking-detail">✂️ ${b.service} · ${b.barber}</div>
+          <div class="booking-detail">📅 ${formatDate(b.date)}, ${b.slot}</div>
+          <div class="booking-detail">💰 ${b.price.toLocaleString()} so'm</div>
+        </div>
+        <span class="booking-status ${b.status==='upcoming'?'status-upcoming':b.status==='cancelled'?'status-cancelled':'status-done'}">${b.status==='upcoming'?'Kutilmoqda':b.status==='cancelled'?'Bekor qilindi':'Bajarildi'}</span>
+      </div>
+      ${canCancel?`<div class="cancel-policy">${cancelInfo}</div>`:''}
+      ${canCancel&&hoursLeft>2?`<button class="btn btn-ghost" style="margin-top:10px;font-size:13px;color:var(--danger);border-color:var(--danger)" onclick="cancelBooking(${b.id},${hoursLeft})">Bekor qilish</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function showTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const status=tab==='upcoming'?'upcoming':'done';
+  const list=bookings.filter(b=>b.status===status);
+  const cnt=document.getElementById('bookings-content');
+  if(!list.length){
+    cnt.innerHTML=`<div class="empty"><div class="empty-icon">${tab==='upcoming'?'📅':'🕐'}</div><p>${tab==='upcoming'?'Navbat yo\'q':'Tarix yo\'q'}</p></div>`;
+  } else {
+    cnt.innerHTML=list.map(b=>`<div class="booking-card">
+      <div class="booking-card-header">
+        <div>
+          <div class="booking-shop">${b.emoji} ${b.shop}</div>
+          <div class="booking-detail">✂️ ${b.service} · ${b.barber}</div>
+          <div class="booking-detail">📅 ${formatDate(b.date)}, ${b.slot}</div>
+          <div class="booking-detail">💰 ${b.price.toLocaleString()} so'm</div>
+        </div>
+        <span class="booking-status ${b.status==='upcoming'?'status-upcoming':'status-done'}">${b.status==='upcoming'?'Kutilmoqda':'Bajarildi'}</span>
+      </div>
+    </div>`).join('');
+  }
+}
+
+function cancelBooking(id,hoursLeft){
+  const b=bookings.find(x=>x.id===id);
+  if(!b)return;
+  const penalty=hoursLeft>24?0:hoursLeft>2?50:100;
+  const msg=penalty===0?'Bepul bekor qilinadi.':`${penalty}% jarima (${(b.price*penalty/100).toLocaleString()} so'm) ushlanadi.`;
+  if(confirm(`Navbatni bekor qilasizmi?\n${msg}`)){
+    b.status='cancelled';
+    localStorage.setItem('ct_bookings',JSON.stringify(bookings));
+    renderBookings('upcoming');
+    showToast('Navbat bekor qilindi');
+  }
+}
+
+// PROFILE
+function renderProfile(){
+  const visits=bookings.length;
+  const saved=loyaltyCount>=10?bookings[0]?.price||0:0;
+  document.getElementById('p-visits').textContent=visits;
+  document.getElementById('p-saved').textContent=(saved/1000).toFixed(0)+'K';
+  document.getElementById('loyalty-count').textContent=loyaltyCount+'/10';
+  document.getElementById('loyalty-text').textContent=loyaltyCount>=9?'🎉 Keyingi xizmat BEPUL!':'10 tashrifdan 1 tasi bepul!';
+  const dots=document.getElementById('loyalty-dots');
+  dots.innerHTML=Array.from({length:10},(_,i)=>`<div class="loyalty-dot ${i<loyaltyCount?'filled':''}">
+    ${i<loyaltyCount?'✓':''}
+  </div>`).join('');
+}
+
+// TOAST
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click',function(e){
+  if(e.target===this)closeModal();
+});
+
+// Init
+renderProfile();
+</script>
+</body>
+</html>
